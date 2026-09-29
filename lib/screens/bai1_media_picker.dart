@@ -12,65 +12,54 @@ class Bai1MediaPicker extends StatefulWidget {
 }
 
 class _Bai1MediaPickerState extends State<Bai1MediaPicker> {
-  // Biến lưu trữ file ảnh hoặc video sau khi người dùng chọn
   File? _mediaFile;
-  
-  // Bộ điều khiển (controller) dùng để phát video
   VideoPlayerController? _videoController;
-  
-  // Đối tượng dùng để mở thư viện hoặc camera
   final ImagePicker _picker = ImagePicker();
 
-  // Hàm dùng để xin quyền truy cập (Bộ nhớ hoặc Camera)
+  // Hàm xin quyền truy cập
   Future<void> _requestPermission(Permission permission) async {
-    // Nếu quyền bị từ chối, sẽ hiện hộp thoại hỏi người dùng cấp quyền
     if (await permission.isDenied) {
       await permission.request();
     }
   }
 
-  // Hàm chọn ảnh hoặc video từ Thư viện (Gallery)
+  // Chọn ảnh hoặc video từ Thư viện
   Future<void> _pickMedia(ImageSource source, bool isVideo) async {
-    // 1. Xin quyền: Nếu là video thì xin quyền storage, ảnh thì xin quyền photos
-    await _requestPermission(
-      isVideo ? Permission.storage : Permission.photos,
-    );
+    if (isVideo) {
+      await _requestPermission(Permission.storage);
+    } else {
+      await _requestPermission(Permission.photos);
+    }
 
-    // 2. Mở thư viện lên để chọn file
-    final XFile? pickedFile = isVideo
-        ? await _picker.pickVideo(source: source) // Chọn video
-        : await _picker.pickImage(                 // Chọn ảnh
-            source: source,
-            imageQuality: 100, // Chất lượng ảnh 100%
-            maxWidth: 1920,    // Chiều rộng tối đa
-            maxHeight: 1080,   // Chiều cao tối đa
-          );
+    final XFile? pickedFile;
+    if (isVideo) {
+      pickedFile = await _picker.pickVideo(source: source);
+    } else {
+      pickedFile = await _picker.pickImage(
+        source: source,
+        imageQuality: 100,
+        maxWidth: 1920,
+        maxHeight: 1080,
+      );
+    }
 
-    // 3. Xử lý sau khi người dùng chọn file xong
     if (pickedFile != null) {
       setState(() {
-        _mediaFile = File(pickedFile.path); // Lưu đường dẫn file vào biến
+        _mediaFile = File(pickedFile!.path);
         
-        // Kiểm tra xem file có phải là đuôi mp4 (video) không
         if (_mediaFile!.path.endsWith('.mp4')) {
-          _videoController?.dispose(); // Xóa bộ nhớ video cũ (nếu có)
-          
-          // Nạp file video mới vào bộ điều khiển
+          _videoController?.dispose();
           _videoController = VideoPlayerController.file(_mediaFile!);
-          
-          // Khởi tạo video, nạp xong thì cho tự động phát (play)
           _videoController!.initialize().then((_) {
-            setState(() {}); // Báo cho giao diện cập nhật
+            setState(() {});
             _videoController!.play();
           });
         } else {
-          // Nếu không phải video (tức là ảnh) thì tắt bộ điều khiển video đi
           _videoController?.dispose();
           _videoController = null;
         }
       });
     } else {
-      // Báo lỗi nếu người dùng bấm Hủy, không chọn gì cả
       if(mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Chưa chọn file nào!')));
@@ -78,23 +67,23 @@ class _Bai1MediaPickerState extends State<Bai1MediaPicker> {
     }
   }
 
-  // Hàm mở Camera để Chụp ảnh hoặc Quay video
+  // Mở Camera để chụp ảnh hoặc quay video
   Future<void> _captureMedia(bool isVideo) async {
-    // 1. Xin quyền mở Camera, nếu là quay video thì xin thêm quyền Micro
     await _requestPermission(Permission.camera);
     if (isVideo) {
       await _requestPermission(Permission.microphone);
     }
 
-    // 2. Mở Camera lên
-    final XFile? capturedFile = isVideo
-        ? await _picker.pickVideo(source: ImageSource.camera) // Quay video
-        : await _picker.pickImage(source: ImageSource.camera); // Chụp ảnh
+    final XFile? capturedFile;
+    if (isVideo) {
+      capturedFile = await _picker.pickVideo(source: ImageSource.camera);
+    } else {
+      capturedFile = await _picker.pickImage(source: ImageSource.camera);
+    }
 
-    // 3. Xử lý sau khi chụp/quay xong (Tương tự như lúc chọn từ thư viện)
     if (capturedFile != null) {
       setState(() {
-        _mediaFile = File(capturedFile.path);
+        _mediaFile = File(capturedFile!.path);
         
         if (isVideo) {
           _videoController?.dispose();
@@ -116,10 +105,9 @@ class _Bai1MediaPickerState extends State<Bai1MediaPicker> {
     }
   }
 
-  // Hàm dọn dẹp bộ nhớ khi thoát màn hình này
   @override
   void dispose() {
-    _videoController?.dispose(); // Giải phóng video controller để tránh tràn RAM
+    _videoController?.dispose();
     super.dispose();
   }
 
@@ -132,27 +120,25 @@ class _Bai1MediaPickerState extends State<Bai1MediaPicker> {
           children: [
             const SizedBox(height: 30),
             
-            // KHU VỰC HIỂN THỊ ẢNH / VIDEO
-            // Cấu trúc IF-ELSE (dạng rút gọn: điều_kiện ? nếu_đúng : nếu_sai)
-            _mediaFile == null
-                ? const Text('Chưa chọn ảnh hoặc video.') // Chưa có file -> Hiện chữ
-                : _videoController != null
-                    ? (_videoController!.value.isInitialized
-                        ? AspectRatio(
-                            // Hiển thị khung video với tỷ lệ chuẩn
-                            aspectRatio: _videoController!.value.aspectRatio,
-                            child: VideoPlayer(_videoController!),
-                          )
-                        : const SizedBox(
-                            // Khi video đang nạp, hiển thị vòng xoay tải
-                            height: 300,
-                            child: Center(child: CircularProgressIndicator()),
-                          ))
-                    : Image.file(_mediaFile!, height: 300), // Nếu là ảnh thì hiện ảnh
+      
+            if (_mediaFile == null)
+              const Text('Chưa chọn ảnh hoặc video.')
+            else if (_videoController != null)
+              if (_videoController!.value.isInitialized)
+                AspectRatio(
+                  aspectRatio: _videoController!.value.aspectRatio,
+                  child: VideoPlayer(_videoController!),
+                )
+              else
+                const SizedBox(
+                  height: 300,
+                  child: Center(child: CircularProgressIndicator()),
+                )
+            else
+              Image.file(_mediaFile!, height: 300),
 
             const SizedBox(height: 20),
             
-            // KHU VỰC CÁC NÚT BẤM
             ElevatedButton(
               onPressed: () => _pickMedia(ImageSource.gallery, false),
               child: const Text('Chọn ảnh từ Gallery'),

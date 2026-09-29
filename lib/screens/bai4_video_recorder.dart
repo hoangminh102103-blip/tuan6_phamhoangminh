@@ -12,35 +12,30 @@ class Bai4VideoRecorder extends StatefulWidget {
 }
 
 class _Bai4VideoRecorderState extends State<Bai4VideoRecorder> {
-  // Biến lưu trữ file video
   File? _videoFile;
-  
-  // Trình điều khiển để phát video
   VideoPlayerController? _videoController;
-  
   final ImagePicker _picker = ImagePicker();
 
-  // Hàm xin quyền
   Future<void> _requestPermission(Permission permission) async {
     if (await permission.isDenied) {
       await permission.request();
     }
   }
 
-  // Hàm chọn video có sẵn từ Thư viện
+  // Chọn video từ Thư viện
   Future<void> _pickVideoFromGallery() async {
     await _requestPermission(Permission.photos);
     final XFile? pickedFile = await _picker.pickVideo(source: ImageSource.gallery);
     
     if (pickedFile != null) {
-      _loadVideo(File(pickedFile.path)); // Gửi file video vào hàm _loadVideo để nạp
+      _loadVideo(File(pickedFile.path));
     }
   }
 
-  // Hàm quay một video mới từ Camera
+  // Quay video từ Camera
   Future<void> _recordVideoFromCamera() async {
-    await _requestPermission(Permission.camera);     // Xin quyền Camera
-    await _requestPermission(Permission.microphone); // Xin quyền Micro để thu âm
+    await _requestPermission(Permission.camera);     
+    await _requestPermission(Permission.microphone); 
     
     final XFile? recordedFile = await _picker.pickVideo(source: ImageSource.camera);
     
@@ -49,27 +44,33 @@ class _Bai4VideoRecorderState extends State<Bai4VideoRecorder> {
     }
   }
 
-  // Hàm chung dùng để NẠP file video vào Trình phát
+  // Nạp file video vào Trình phát
   void _loadVideo(File videoFile) {
     setState(() {
       _videoFile = videoFile;
-      _videoController?.dispose(); // Xóa video cũ nếu có đang phát
+      _videoController?.dispose(); 
       
-      // Tạo controller mới nạp file video vừa chọn
       _videoController = VideoPlayerController.file(_videoFile!)
         ..initialize().then((_) {
-          // Khi nạp xong thì báo UI cập nhật lại và tự động bấm Play
           setState(() {});
           _videoController!.play();
         });
     });
   }
 
-  // Hàm dọn rác khi thoát màn hình
   @override
   void dispose() {
     _videoController?.dispose();
     super.dispose();
+  }
+
+  // Hàm quyết định hiển thị nút Play hay Pause
+  IconData _getPlayPauseIcon() {
+    if (_videoController!.value.isPlaying) {
+      return Icons.pause;
+    } else {
+      return Icons.play_arrow;
+    }
   }
 
   @override
@@ -81,20 +82,21 @@ class _Bai4VideoRecorderState extends State<Bai4VideoRecorder> {
           children: [
             const SizedBox(height: 20),
             
-            // Nếu có controller và đã nạp (initialize) thành công thì mới hiện VideoPlayer
-            _videoController != null && _videoController!.value.isInitialized
-                ? AspectRatio(
-                    aspectRatio: _videoController!.value.aspectRatio,
-                    child: VideoPlayer(_videoController!),
-                  )
-                : Container(
-                    height: 200,
-                    alignment: Alignment.center,
-                    child: const Text('Chưa có video nào được chọn.'),
-                  ),
+            // Dùng if-else thuần thay cho toán tử điều kiện (ternary)
+            if (_videoController != null && _videoController!.value.isInitialized)
+              AspectRatio(
+                aspectRatio: _videoController!.value.aspectRatio,
+                child: VideoPlayer(_videoController!),
+              )
+            else
+              Container(
+                height: 200,
+                alignment: Alignment.center,
+                child: const Text('Chưa có video nào được chọn.'),
+              ),
+              
             const SizedBox(height: 20),
             
-            // CÁC NÚT ĐIỀU KHIỂN PLAY/PAUSE (Chỉ hiện khi đã nạp video)
             if (_videoController != null)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -102,24 +104,20 @@ class _Bai4VideoRecorderState extends State<Bai4VideoRecorder> {
                   ElevatedButton(
                     onPressed: () {
                       setState(() {
-                        // Nếu đang phát thì ấn vào sẽ Pause, và ngược lại
-                        _videoController!.value.isPlaying
-                            ? _videoController!.pause()
-                            : _videoController!.play();
+                        if (_videoController!.value.isPlaying) {
+                          _videoController!.pause();
+                        } else {
+                          _videoController!.play();
+                        }
                       });
                     },
-                    // Đổi icon Play/Pause tương ứng
-                    child: Icon(
-                      _videoController!.value.isPlaying
-                          ? Icons.pause
-                          : Icons.play_arrow,
-                    ),
+                    child: Icon(_getPlayPauseIcon()),
                   ),
                 ],
               ),
+              
             const SizedBox(height: 20),
             
-            // CÁC NÚT CHỌN/QUAY VIDEO
             ElevatedButton(
               onPressed: _pickVideoFromGallery,
               child: const Text('Chọn video từ Gallery'),

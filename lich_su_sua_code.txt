@@ -1,0 +1,84 @@
+==================================================
+TÀI LIỆU TÓM TẮT CÁC FILE ĐÃ SỬA VÀ ĐƯỜNG DẪN
+==================================================
+
+Dưới đây là danh sách toàn bộ các file mà AI (Antigravity) đã thêm mới hoặc chỉnh sửa để hoàn thiện bài tập Tuần 6 (Multimedia) cho bạn, kèm theo đường dẫn tuyệt đối:
+
+1. FILE CẤU HÌNH THƯ VIỆN & TÀI NGUYÊN (pubspec.yaml)
+- Đường dẫn: f:\hoc\Nam3\PTUD\tuan6_phamhoangminh\pubspec.yaml
+- Sửa gì: 
+  + Thêm các package: image_picker, permission_handler, video_player, another_telephony, flutter_contacts_service, audioplayers.
+  + Thêm khối `assets:` để khai báo thư mục chứa file nhạc (`- assets/audios/`).
+
+2. FILE CẤP QUYỀN ANDROID (AndroidManifest.xml)
+- Đường dẫn: f:\hoc\Nam3\PTUD\tuan6_phamhoangminh\android\app\src\main\AndroidManifest.xml
+- Sửa gì: 
+  + Thêm 8 dòng `<uses-permission ...>` ở ngay trên thẻ `<application>` để xin quyền: Truy cập Camera, Đọc/Ghi Storage, Ghi âm, Đọc/Ghi Danh bạ, và Đọc/Nhận SMS. (Việc này giúp app mới có thể bật hộp thoại hỏi quyền người dùng).
+
+3. FILE CHẠY CHÍNH CỦA APP (main.dart)
+- Đường dẫn: f:\hoc\Nam3\PTUD\tuan6_phamhoangminh\lib\main.dart
+- Sửa gì: 
+  + Xóa code mặc định, tạo ra giao diện mới với một `Drawer` (menu trượt bên trái).
+  + Thêm điều hướng để gộp tất cả các Bài 1, 2, 3, 4, 5, 6 vào chung một Project.
+
+4. CÁC FILE GIAO DIỆN BÀI TẬP (Nằm trong thư mục con lib/screens/)
+Tất cả các file này được tạo mới hoàn toàn để tách code cho dễ quản lý:
+
+  a) Bài 1: Media Picker (Chọn ảnh/video)
+  - Đường dẫn: f:\hoc\Nam3\PTUD\tuan6_phamhoangminh\lib\screens\bai1_media_picker.dart
+  - Chú ý: Đã fix lỗi văng màn hình đỏ khi chọn video (Thêm vòng xoay loading chờ video load xong, tránh việc app nhận nhầm video là ảnh).
+
+  b) Bài 2: Photo Capture (Chụp và xem ảnh)
+  - Đường dẫn: f:\hoc\Nam3\PTUD\tuan6_phamhoangminh\lib\screens\bai2_photo_capture.dart
+
+  c) Bài 3 & 5: Đọc SMS và Quản lý Danh bạ
+  - Đường dẫn: f:\hoc\Nam3\PTUD\tuan6_phamhoangminh\lib\screens\bai3_5_telephony.dart
+  - Chú ý: Đã đổi thư viện sang `flutter_contacts_service` cho đúng chuẩn với tài liệu PDF của bạn, fix lỗi sai cú pháp lúc đầu.
+
+  d) Bài 4: Video Recorder (Quay video từ camera)
+  - Đường dẫn: f:\hoc\Nam3\PTUD\tuan6_phamhoangminh\lib\screens\bai4_video_recorder.dart
+
+  e) Bài 6: Audio Player (Nghe nhạc)
+  - Đường dẫn: f:\hoc\Nam3\PTUD\tuan6_phamhoangminh\lib\screens\bai6_audio_player.dart
+
+5. THƯ MỤC CHỨA NHẠC (Đã tải sẵn nhạc test)
+- Đường dẫn: f:\hoc\Nam3\PTUD\tuan6_phamhoangminh\assets\audios\
+- Sửa gì: 
+  + Tạo mới thư mục `assets/audios/`
+  + Tải ngầm 3 file `sample1.mp3`, `sample2.mp3`, `sample3.mp3` vào đây để Bài 6 có nhạc phát.
+
+==================================================
+CÁC BƯỚC ĐÃ THỰC HIỆN (TỪ LÚC NHẬN YÊU CẦU ĐẾN NAY)
+==================================================
+Nếu bạn cần viết báo cáo hoặc giải trình cách làm, đây là toàn bộ các bước đã diễn ra:
+
+* BƯỚC 1: KHỞI TẠO VÀ CÀI ĐẶT THƯ VIỆN
+- Phân tích file PDF hướng dẫn.
+- Chạy lệnh Terminal để cài đặt các thư viện cần thiết:
+  `flutter pub add image_picker permission_handler video_player another_telephony flutter_contacts_service audioplayers`
+
+* BƯỚC 2: CẤU HÌNH QUYỀN TRUY CẬP (PERMISSIONS)
+- Mở file `android/app/src/main/AndroidManifest.xml`.
+- Bổ sung 8 dòng `<uses-permission>` để khai báo cho hệ điều hành Android biết app sẽ sử dụng Camera, Bộ nhớ, Micro, SMS và Danh bạ.
+
+* BƯỚC 3: THIẾT KẾ CẤU TRÚC GIAO DIỆN CHUNG
+- Thay vì để mỗi bài tập là một project rời rạc, đã gom tất cả lại.
+- Viết đè file `lib/main.dart` để tạo một giao diện có `Drawer` (menu điều hướng bên trái), giúp người dùng dễ dàng bấm chọn "Bài 1", "Bài 2"...
+
+* BƯỚC 4: LẬP TRÌNH TỪNG CHỨC NĂNG (TẠO FOLDER lib/screens/)
+- Viết `bai1_media_picker.dart`: Code chức năng chọn ảnh/video từ thư viện hoặc chụp trực tiếp. (Fix lỗi treo app khi load video).
+- Viết `bai2_photo_capture.dart`: Code chức năng chụp ảnh và hiển thị full màn hình.
+- Viết `bai4_video_recorder.dart`: Code chức năng quay video và phát video (Play/Pause).
+- Viết `bai3_5_telephony.dart`: Kết hợp giao diện Đọc SMS và Quản lý danh bạ. Code xin quyền `Permission.sms` và `Permission.contacts`, sau đó lấy dữ liệu đổ ra danh sách (ListView).
+- Viết `bai6_audio_player.dart`: Code sử dụng `audioplayers` để phát nhạc từ trong máy.
+
+* BƯỚC 5: XỬ LÝ DỮ LIỆU ĐỂ TEST
+- Tạo thư mục `assets/audios/`.
+- Cấu hình file `pubspec.yaml` để nhận diện thư mục `assets/audios/`.
+- Dùng lệnh tải trực tiếp 3 file mp3 từ Internet bỏ vào thư mục này.
+- Hướng dẫn giả lập tin nhắn SMS và kéo thả ảnh vào máy ảo để có dữ liệu thử nghiệm.
+
+* BƯỚC 6: KIỂM TRA LỖI (DEBUG & FIX)
+- Fix lỗi thư viện danh bạ: Gỡ `flutter_contacts` bản mới, cài lại `flutter_contacts_service` bản cũ theo chuẩn giáo trình để không bị lỗi code.
+- Chạy `flutter clean` và `flutter build apk` để dọn rác và đóng gói thành công.
+==================================================

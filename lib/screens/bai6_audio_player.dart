@@ -22,7 +22,7 @@ class _Bai6AudioPlayerState extends State<Bai6AudioPlayer> {
   final List<String> _songTitles = ['sample1', 'sample2', 'sample3'];
 
   @override
-  void initState() {
+  void initState() { 
     super.initState();
     _audioPlayer = AudioPlayer();
 
